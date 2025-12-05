@@ -11,8 +11,8 @@ const campaigns = [
     description: "First campaign live now.",
     project_name: "Project Alpha",
     project_image: "/campaign.png",
-    starts_at: new Date(now.getTime() - 1000 * 60 * 60 * 24).toISOString(), // yesterday
-    ends_at: new Date(now.getTime() + 1000 * 60 * 60 * 24).toISOString(),   // tomorrow
+    starts_at: new Date(2025, 12, 5),
+    ends_at: new Date(2026, 1, 3),
     metadata: JSON.stringify({ participants: 250, category: "NFT" }),
     rewards: {
       amount: 3000,
