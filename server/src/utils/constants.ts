@@ -9,7 +9,7 @@ export const NexonsAddress: addressType = {
   lvl5: "0x",
   lvl6: "0x",
   lvl7: "0x",
-  lvl8: "0x"
-  lvl9: "0x"
-  lvl10: "0x"
-}
+  lvl8: "0x",
+  lvl9: "0x",
+  lvl10: "0x",
+};
