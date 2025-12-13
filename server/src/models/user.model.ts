@@ -20,11 +20,11 @@ const userSchema = new Schema({
 		tier: {
 			name: {
 				type: String,
-				default: "Enchanter",
+				default: "Trail Initiate",
 			},
 			level: {
 				type: Number,
-				default: 0,
+				default: 1,
 			},
 		},
 		xp: {
