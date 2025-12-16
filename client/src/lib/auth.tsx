@@ -27,13 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = getSessionToken();
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
-          console.log("🔑 Sending Authorization header for /api/me");
+          console.log("🔑 Sending Authorization header for /api/user/profile");
         } else {
-          console.log("❌ No accessToken found for /api/me");
+          console.log("❌ No accessToken found for /api/user/profile");
         }
 
         // Use apiRequest which includes Authorization: Bearer <token> when present
-        const res = await apiRequest("GET", "/api/me").catch(err => {
+        const res = await apiRequest("GET", "/api/user/profile").catch(err => {
           console.warn("Network error fetching profile:", String(err));
           return null;
         });
