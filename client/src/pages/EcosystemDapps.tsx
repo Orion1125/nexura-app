@@ -10,17 +10,18 @@ import { emitSessionChange } from "@/lib/session";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { buildUrl } from "@/lib/queryClient";
 import { motion } from "framer-motion";
+import { apiRequest, apiRequestV2, getStoredAccessToken } from "../lib/queryClient";
 
 interface Dapp {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   category: string;
   logo: string;
-  questReward: string;
+  reward: string;
   isCompleted?: boolean;
-  isClaimed?: boolean;
-  estimatedTime?: string;
+  done: boolean;
+  timer?: string;
   websiteUrl: string;
 }
 
@@ -29,135 +30,15 @@ export default function EcosystemDapps() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [dapps, setDapps] = useState<Dapp[]>([]);
 
-  const dapps: Dapp[] = [
-    {
-      id: "trustswap",
-      name: "TrustSwap",
-      description: "Decentralized exchange for seamless token swaps within the ecosystem.",
-      category: "DeFi",
-      logo: "/ecosystem/TrustSwap.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://trustswap.intuition.box/swap"
-    },
-    {
-      id: "trust-quests",
-      name: "Trust Quests",
-      description: "Complete quests to earn rewards and build your on-chain reputation.",
-      category: "Quests",
-      logo: "/ecosystem/Trust Quests.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://www.trustquests.com"
-    },
-    {
-      id: "intuition-portal",
-      name: "Intuition Portal",
-      description: "Your gateway to the Intuition ecosystem and identity management.",
-      category: "Portal",
-      logo: "/ecosystem/Intuition Portal.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://portal.intuition.systems"
-    },
-    {
-      id: "trust-name-service",
-      name: "Trust Name Service",
-      description: "Secure your unique identity with decentralized naming.",
-      category: "Domain Name",
-      logo: "/ecosystem/Trust Name Service.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://tns.intuition.box"
-    },
-    {
-      id: "inturank",
-      name: "Inturank",
-      description: "Reputation and ranking system for ecosystem participants.",
-      category: "Reputation",
-      logo: "/ecosystem/Inturank.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://inturank.intuition.box"
-    },
-    {
-      id: "tribememe",
-      name: "Tribememe",
-      description: "Community-driven meme culture and social engagement platform.",
-      category: "Social",
-      logo: "/ecosystem/Tribememe.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://tribememe.app"
-    },
-    {
-      id: "intuition-bets",
-      name: "IntuitionBets",
-      description: "Decentralized prediction markets and betting platform.",
-      category: "Prediction Markets",
-      logo: "/ecosystem/IntuitionBets.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://intuitionbets.com"
-    },
-    {
-      id: "trust-card",
-      name: "TrustCard",
-      description: "Digital identity card showcasing your ecosystem achievements.",
-      category: "Identity",
-      logo: "/ecosystem/Trust Card.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://trustcard.box"
-    },
-    {
-      id: "sofia",
-      name: "Sofia",
-      description: "AI-powered assistant for navigating the ecosystem.",
-      category: "AI",
-      logo: "/ecosystem/Sofia.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://sofia.intuition.box"
-    },
-    {
-      id: "revel-8",
-      name: "Revel 8",
-      description: "Immersive gaming and entertainment experiences.",
-      category: "Gaming",
-      logo: "/ecosystem/Revel8.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://revel8.io"
-    },
-    {
-      id: "intuition-mcp",
-      name: "IntuitionMCP",
-      description: "Master Control Protocol for advanced ecosystem interactions.",
-      category: "Infrastructure",
-      logo: "/ecosystem/Intuition MCP.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://www.intuitionmcp.xyz"
-    },
-    {
-      id: "urban-mayhem",
-      name: "Urban Mayhem",
-      description: "Strategy game set in a chaotic urban environment.",
-      category: "Gaming",
-      logo: "/ecosystem/Urban Mayhem.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://urban-mayhem-store.vercel.app"
-    },
-    {
-      id: "go-form",
-      name: "Go Form",
-      description: "Decentralized form builder and data collection tool.",
-      category: "Tools",
-      logo: "/ecosystem/GoForm.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://goform.biz"
-    },
-    {
-      id: "agent-player-map",
-      name: "Agent Player Map",
-      description: "Interactive map tracking agents and players across the network.",
-      category: "Tools",
-      logo: "/ecosystem/Agent Player Map.jpg",
-      questReward: "50 XP",
-      websiteUrl: "https://playermap.box"
-    }
-  ];
+  useEffect(() => {
+    (async () => {
+      const { ecosystemQuests } = await apiRequestV2("GET", "/api/ecosystem-quests");
+
+      setDapps(ecosystemQuests);
+    })();
+  }, []);
 
   const categories = ["All", ...Array.from(new Set(dapps.map(d => d.category)))];
 
@@ -180,8 +61,12 @@ export default function EcosystemDapps() {
     try { localStorage.setItem('nexura:claimed:dapps', JSON.stringify(claimedDapps)); } catch {}
   }, [claimedDapps]);
 
-  const markVisited = (id: string) => {
-    if (!visitedDapps.includes(id)) setVisitedDapps(prev => [...prev, id]);
+  const markVisited = async (dapp: Dapp) => {
+    if (!visitedDapps.includes(dapp._id)) setVisitedDapps(prev => [...prev, dapp._id]);
+    
+    window.open(dapp.websiteUrl, "_blank");
+
+    await apiRequestV2("POST", `/api/quest/set-timer?id=${dapp._id}`);
   };
 
   const markClaimed = (id: string) => {
@@ -195,40 +80,33 @@ export default function EcosystemDapps() {
   };
 
   const handleClaim = async (dapp: Dapp) => {
-    if (!user || !user.id) {
+    if (!getStoredAccessToken()) {
       toast({ title: 'Sign in required', description: 'Please sign in to claim XP', variant: 'destructive' });
       return;
     }
-    if (claimedDapps.includes(dapp.id)) {
+
+    if (dapp.done) {
       toast({ title: 'Already claimed', description: 'You have already claimed this reward.' });
       return;
     }
 
-    const xp = getXpFromReward(dapp.questReward || '0');
-    if (xp <= 0) {
-      toast({ title: 'No XP configured', description: 'This dapp has no XP reward configured', variant: 'destructive' });
-      return;
-    }
-
     try {
-      const headers: Record<string,string> = { 'Content-Type': 'application/json' };
-      try { const token = localStorage.getItem('accessToken'); if (token) headers['Authorization'] = `Bearer ${token}`; } catch(e){}
-      const resp = await fetch(buildUrl('/api/xp/add'), { method: 'POST', headers, body: JSON.stringify({ userId: user.id, xp, questId: dapp.id, questsCompletedDelta: 0, tasksCompletedDelta: 0 }) });
-      if (resp.status === 409) {
-        markClaimed(dapp.id);
-        toast({ title: 'Already claimed', description: 'You have already claimed this reward.' });
+      const resp = await apiRequestV2("POST", `/api/quest/claim-ecosystem-quest?id=${dapp._id}`);
+
+      if (resp.error) {
+        toast({ title: 'Error', description: resp.error });
+
         return;
       }
-      if (!resp.ok) {
-        const t = await resp.text().catch(() => String(resp.status));
-        throw new Error(`Claim failed: ${t}`);
-      }
-      markClaimed(dapp.id);
-      try { emitSessionChange(); } catch(e){}
-      toast({ title: 'XP awarded', description: `+${xp} XP` });
-    } catch (e) {
-      console.error('claim error', e);
-      toast({ title: 'Claim failed', description: 'Failed to claim XP. Please try again.', variant: 'destructive' });
+
+      markClaimed(dapp._id);
+      // try { emitSessionChange(); } catch(e){}
+      toast({ title: 'XP awarded', description: `+${dapp.reward} XP` });
+
+      window.location.reload();
+    } catch (error) {
+      console.error('claim error:', error);
+      toast({ title: 'Claim failed', description: error, variant: 'destructive' });
     }
   };
 
@@ -274,7 +152,7 @@ export default function EcosystemDapps() {
               onClick={() => setSelectedCategory(category)}
               data-testid={`category-${category.toLowerCase()}`}
             >
-              {category}
+              {category.toUpperCase()}
             </Button>
           ))}
         </div>
@@ -282,7 +160,7 @@ export default function EcosystemDapps() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDapps.map((dapp, index) => (
             <motion.div
-              key={dapp.id}
+              key={dapp._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -317,15 +195,17 @@ export default function EcosystemDapps() {
                 <CardContent className="mt-auto space-y-4">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Reward:</span>
-                    <span className="font-bold text-primary">{dapp.questReward}</span>
+                    <span className="font-bold text-primary">{dapp.reward} XP</span>
+                    <span className="text-muted-foreground">Timer:</span>
+                    <span className="font-bold text-primary">1 Minute</span>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Button 
                       asChild 
                       className="flex-1" 
                       variant="outline"
-                      onClick={() => markVisited(dapp.id)}
+                      onClick={() => markVisited(dapp)}
                     >
                       <a href={dapp.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                         Launch App <ExternalLink className="w-4 h-4" />
@@ -334,11 +214,14 @@ export default function EcosystemDapps() {
                     
                     <Button
                       className="flex-1"
-                      variant={claimedDapps.includes(dapp.id) ? 'secondary' : 'default'}
-                      disabled={!visitedDapps.includes(dapp.id) || claimedDapps.includes(dapp.id)}
-                      onClick={(e) => { e.stopPropagation(); handleClaim(dapp); }}
+                      variant={dapp.done ? 'secondary' : 'default'}
+                      disabled={!visitedDapps.includes(dapp._id) || dapp.done}
+                      onClick={(e) => { 
+                        e.stopPropagation();
+                        handleClaim(dapp);
+                      }}
                     >
-                      {claimedDapps.includes(dapp.id) ? 'Claimed' : 'Claim XP'}
+                      {dapp.done ? 'Claimed' : 'Claim XP'}
                     </Button>
                   </div>
                 </CardContent>

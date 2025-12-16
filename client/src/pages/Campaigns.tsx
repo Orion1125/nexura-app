@@ -18,7 +18,7 @@ interface Campaign {
   ends_at?: string;
   metadata?: string;
   reward: { trustTokens: number; xp: number; pool?: number };
-  url?: string;
+  joined: boolean;
   status?: string;
 }
 
@@ -28,6 +28,7 @@ const TASKS_CARD: Campaign = {
   title: "Start Campaign Tasks",
   description: "Complete unique tasks in the Nexura ecosystem and earn rewards",
   project_name: "NEXURA",
+  joined: false,
   participants: 250,
   reward: { trustTokens: 16, xp: 5, pool: 4000 },
   projectCoverImage: "/campaign.png",
@@ -57,6 +58,18 @@ export default function Campaigns() {
     setCampaigns(res.campaigns);
     setIsLoading(false);
   }, 300000);
+
+  const goToCampaign = async (campaign: Campaign, active: boolean) => {
+    if (!active) return;
+
+    if (!campaign.joined) {
+      setLocation(`/campaign/${campaign._id}`);
+      return;
+    }
+
+    await apiRequestV2("POST", `/api/campaign/join-campaign?id=${campaign._id}`);
+    setLocation(`/campaign/${campaign._id}`);
+  }
 
   const now = new Date();
 
@@ -189,16 +202,15 @@ export default function Campaigns() {
                 ? "bg-[#1f6feb] hover:bg-[#388bfd] text-white"
                 : "bg-gray-600 cursor-not-allowed text-gray-300"
               }`}
-            onClick={() => {
-              if (!isActive) return;
-             setLocation(`/campaign/${campaign._id}`);
-            }}
+            onClick={
+              goToCampaign(campaign, isActive)
+            }
             disabled={!isActive}
           >
             {isActive ? (
               <>
                 <ExternalLink className="w-4 h-4 mr-2" />
-                {"Start Tasks"}
+                {"Join Campaign"}
               </>
             ) : (
               <>

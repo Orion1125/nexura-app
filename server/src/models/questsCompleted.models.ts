@@ -78,27 +78,24 @@ export const campaignQuestCompleted = mongoose.model(
 	campaignQuestCompletedSchema
 );
 
-const ecosystemQuestCompletedSchema = new Schema(
-	{
-		done: {
-			type: Boolean,
-			required: true,
-		},
-		timer: {
-			type: Date,
-			required: true,
-		},
-		ecosystemQuest: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "ecosystemQuest",
-		},
-		user: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "user",
-		},
+const ecosystemQuestCompletedSchema = new Schema({
+	done: {
+		type: Boolean,
+		required: true,
 	},
-	{ timestamps: true }
-);
+	timer: {
+		type: Date,
+		required: true,
+	},
+	ecosystemQuest: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "ecosystemQuest",
+	},
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "user",
+	},
+}, { timestamps: true });
 
 export const ecosystemQuestCompleted = mongoose.model(
 	"ecosystemQuest-completed",
