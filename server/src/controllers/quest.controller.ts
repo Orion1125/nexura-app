@@ -27,8 +27,30 @@ export const fetchEcosystemDapps = async (
 ) => {
 	try {
 		const ecosystemQuests = await ecosystemQuest.find();
+		const ecosystemQuestsCompleted = await ecosystemQuestCompleted.find({
+			user: req.id,
+		});
 
-		res.status(OK).json({ message: "quests fetched!", ecosystemQuests });
+		const mergedEcosystemQuests: any[] = [];
+
+		for (const ecoQuest of ecosystemQuests) {
+			const ecoQuestCompleted = ecosystemQuestsCompleted.find(
+				(completedEcoQuest) =>
+					completedEcoQuest.ecosystemQuest?.toString() === ecoQuest._id.toString()
+			);
+
+			const mergedEcoQuest: Record<any, unknown> = ecoQuest.toJSON();
+
+			if (ecoQuestCompleted) {
+				mergedEcoQuest.done = ecoQuestCompleted.done;
+			} else {
+				mergedEcoQuest.done = false;
+			}
+
+			mergedEcosystemQuests.push(mergedEcoQuest);
+		}
+
+		res.status(OK).json({ message: "quests fetched!", ecosystemQuests: mergedEcosystemQuests });
 	} catch (error) {
 		logger.error(error);
 		res.status(INTERNAL_SERVER_ERROR).json({ error: "error fetching quests" });
@@ -458,9 +480,16 @@ export const claimEcosystemQuest = async (
 		if (!ecosystemQuestToClaim) {
 			res
 				.status(FORBIDDEN)
-				.json({ error: "this operation cannot be performed" });
+				.json({ error: "visit ecosystem dapp to proceed" });
 			return;
 		}
+
+		if (ecosystemQuestToClaim.done) {
+			res
+				.status(FORBIDDEN)
+				.json({ error: "ecosystem quest has been completed" });
+			return;
+		} 
 
 		const now = new Date();
 
@@ -472,9 +501,7 @@ export const claimEcosystemQuest = async (
 			return;
 		}
 
-		ecosystemQuestUser.xp += ecosystemQuestFound.rewards?.xp as number;
-		ecosystemQuestUser.trustEarned += ecosystemQuestFound.rewards
-			?.trust as number;
+		ecosystemQuestUser.xp += ecosystemQuestFound.reward;
 
 		ecosystemQuestToClaim.done = true;
 
@@ -504,16 +531,26 @@ export const setTimer = async (req: GlobalRequest, res: GlobalResponse) => {
 
 		const now = new Date();
 
-		const timer = new Date(now.getTime() + questForEcosystem.timer * 60 * 1000);
+		const timer = new Date(now.getTime() + 1 * 60 * 1000);
 
-		await ecosystemQuestCompleted.create({
-			done: false,
-			timer,
-			ecosystemQuest: id,
+		const ecoQuest = await ecosystemQuestCompleted.findOne({
 			user: req.id,
+			ecosystemQuest: id,
 		});
 
-		res.status(OK).json({ message: "timer set" });
+		if (!ecoQuest) {
+			await ecosystemQuestCompleted.create({
+				done: false,
+				timer,
+				ecosystemQuest: id,
+				user: req.id,
+			});
+
+			res.status(OK).json({ message: "timer set" });
+			return;
+		}
+
+		res.status(OK).json({ message: "timer already set" });
 	} catch (error) {
 		logger.error(error);
 		res.status(INTERNAL_SERVER_ERROR).json({ error: "error setting timer" });

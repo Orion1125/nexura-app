@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const ecosystemQuestSchema = new Schema({
-	title: {
+	name: {
 		type: String,
 		required: true,
 	},
@@ -9,40 +9,36 @@ const ecosystemQuestSchema = new Schema({
 		type: String,
 		required: true,
 	},
-	timer: {
-		type: Number,
-		required: true,
-	},
 	logo: {
 		type: String,
 		required: true,
 	},
-	rewards: {
-		xp: {
-			type: Number,
-			default: 0,
-		},
-		trust: {
-			type: Number,
-			default: 0,
-		},
+	reward: {
+		type: Number,
+		required: true
 	},
-	link: {
+	websiteUrl: {
 		type: String,
 		required: true,
 	},
-	tags: {
+	category: {
 		type: String,
 		required: true,
 		enum: [
 			"defi",
-			"lending-protocols",
-			"prediction-markets",
+			"lending protocols",
+			"prediction markets",
 			"nft",
+			"infrastructure",
+			"identity",
+			"reputation",
+			"quests",
+			"ai",
 			"social",
 			"gaming",
+			"tools",
 			"portal",
-			"domain-name",
+			"domain name",
 			"launchpads",
 		],
 	},
