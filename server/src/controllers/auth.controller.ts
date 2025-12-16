@@ -61,14 +61,10 @@ export const signUp = async (req: GlobalRequest, res: GlobalResponse) => {
 		const userReferrer = await user.findOne({ referral: { code: referrerCode } });
 		const hashedPassword = await hashPassword(password);
 
-		const newUser = new user({ username, referral, dateJoined, password: hashedPassword, email });
-
+		const newUser = await user.create({ username, referral, dateJoined, password: hashedPassword, email });
+		const signedUp = formatDate(new Date(), "MMM dd, y");
 		if (userReferrer) {
-			await userReferrer.updateOne({ $inc: { xp: 10, "referral.xp": 10 } });
-			newUser.xp = 10;
-
-			await referredUsers.create({ user: userReferrer._id, referrerCode, username: newUser.username });
-			await newUser.save();
+			await referredUsers.create({ user: userReferrer._id, signedUp, username: newUser.username });
 		}
 
 		const id = newUser._id;
