@@ -27,6 +27,7 @@ export default function QuestEnvironment() {
   const [questNumber, setQuestNumber] = useState<string>("000");
   const [sub_title, setSubTitle] = useState<string>("");
   const [completed, setCompleted] = useState<boolean>(false);
+  // const [miniQuestsCompleted, setMiniQuestsCompleted] = useState<boolean>(false);
   const [title, setTitle] = useState<string>("");
   const [claimedQuests, setClaimedQuests] = useState<string[]>([]);
   const [visitedQuests, setVisitedQuests] = useState<string[]>([]);
@@ -46,6 +47,7 @@ export default function QuestEnvironment() {
       } = await apiRequestV2("GET", `/api/quest/fetch-mini-quests?id=${questId}`);
 
       setCompleted(questCompleted);
+      // setMiniQuestsCompleted();
       setMiniQuests(quests);
       setTotalXP(totalXp);
       setQuestNumber(quest_no);
@@ -53,6 +55,8 @@ export default function QuestEnvironment() {
       setSubTitle(st);
     })();
   }, []);
+
+  const miniQuestsCompleted = miniQuests.filter((m) => m.done === true).length === miniQuests.length;
 
   const claimQuestReward = async () => {
     try {
@@ -180,15 +184,15 @@ export default function QuestEnvironment() {
 
               <Button 
                 onClick={() => claimQuestReward()} 
-                disabled={completed} 
+                disabled={!miniQuestsCompleted || completed} 
                 className={`w-full font-semibold rounded-xl py-3 mt-6 
-                  ${!completed 
+                  ${miniQuestsCompleted || !completed 
                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                     : "bg-gray-600 cursor-not-allowed text-gray-300"
                   }`
                 }
               >
-                {!completed ? "Claim Rewards" : "Quest Completed"}
+                {!completed ? "Claim Rewards" : "Completed"}
               </Button>
             </div>
           </div>

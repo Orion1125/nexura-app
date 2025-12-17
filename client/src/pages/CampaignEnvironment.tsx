@@ -177,7 +177,8 @@ export default function CampaignEnvironment() {
                   ? completed?.campaignCompleted
                     ? "Completed"
                     : "Claim Rewards"
-                  : "Complete Quests"}
+                  : "Complete Quests"
+                }
               </Button>
             </div>
           </div>
