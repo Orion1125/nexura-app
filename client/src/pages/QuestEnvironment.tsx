@@ -211,7 +211,7 @@ export default function QuestEnvironment() {
 
               <Button 
                 onClick={() => claimQuestReward()} 
-                disabled={!miniQuestsCompleted || !(claimedQuests.length === miniQuests.length) || completed || questCompleted} 
+                disabled={!miniQuestsCompleted || completed || !(claimedQuests.length === miniQuests.length) || questCompleted} 
                 className={`w-full font-semibold rounded-xl py-3 mt-6 
                   ${miniQuestsCompleted || !completed || claimedQuests.length === miniQuests.length || !questCompleted
                     ? "bg-purple-600 hover:bg-purple-700 text-white"

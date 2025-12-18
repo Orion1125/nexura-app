@@ -194,9 +194,9 @@ export default function CampaignEnvironment() {
 
               <Button
                 onClick={() => claimCampaignReward()}
-                disabled={!completed?.questsCompleted || !(claimedQuests.length === quests.length) || completed?.campaignCompleted || campaignCompleted}
+                disabled={!completed?.questsCompleted || completed?.campaignCompleted || campaignCompleted || !(claimedQuests.length === quests.length)}
                 className={`w-full font-semibold rounded-xl py-3 mt-6 
-                  ${completed?.questsCompleted || claimedQuests.length === quests.length || !completed?.campaignCompleted || !campaignCompleted
+                  ${completed?.questsCompleted || !completed?.campaignCompleted || !campaignCompleted || claimedQuests.length === quests.length
                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                     : "bg-gray-600 cursor-not-allowed text-gray-300"
                   }`
