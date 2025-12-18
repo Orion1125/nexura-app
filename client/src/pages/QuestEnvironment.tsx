@@ -43,15 +43,17 @@ export default function CampaignEnvironment() {
     return (
       <div
         key={index}
-        className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition"
-      >
-        <p className="font-medium">{task.text}</p>
+        className="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-4 md:p-5 hover:bg-white/10 transition">
+        <p className="font-medium text-sm md:text-base leading-snug">
+{task.text}</p>
 
         <button
           onClick={() => handleTaskClick(tasks, setTasks, index)}
-          className={`px-5 py-2 rounded-full text-sm font-semibold ${
-            task.status === "completed" ? "bg-gray-600 cursor-not-allowed" : "bg-purple-700 hover:bg-purple-800"
-          }`}
+          className={`w-full md:w-auto px-5 py-2.5 rounded-full text-sm font-semibold ${
+  task.status === "completed"
+    ? "bg-gray-600 cursor-not-allowed"
+    : "bg-purple-700 hover:bg-purple-800"
+}`}
         >
           {buttonText}
         </button>
@@ -66,10 +68,11 @@ export default function CampaignEnvironment() {
       <div className="max-w-4xl mx-auto relative z-10 space-y-10">
 
         {/* Banner */}
-        <div className="w-full bg-gradient-to-r from-purple-700/40 to-purple-900/40 border border-white/10 rounded-2xl p-6 flex justify-between items-center">
+        <div className="w-full bg-gradient-to-r from-purple-700/40 to-purple-900/40 border border-white/10 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:gap-0 md:justify-between md:items-center">
           <div>
             <p className="uppercase text-xs opacity-60">Get Started</p>
-            <p className="text-xl font-semibold">Join the Guild</p>
+            <p className="text-lg md:text-xl font-semibold">
+Join the Guild</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -82,8 +85,8 @@ export default function CampaignEnvironment() {
 
         {/* Main Quest Card */}
         <Card className="rounded-2xl bg-white/5 border-white/10 overflow-hidden shadow-xl">
-          <div className="grid grid-cols-2">
-            <div className="h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="h-48 md:h-full">
               <img
                 src="/campaign.png"
                 alt="Quest"
@@ -91,10 +94,10 @@ export default function CampaignEnvironment() {
               />
             </div>
 
-            <div className="p-6 flex flex-col justify-between">
+            <div className="p-5 md:p-6 flex flex-col justify-between">
               <div>
                 <p className="text-xs opacity-50 uppercase mb-1">Nexura</p>
-                <p className="text-xl font-bold leading-tight">Quest 001:<br />Join the Guild</p>
+                <p className="text-lg md:text-xl font-bold leading-tight">Quest 001:<br />Join the Guild</p>
 
                 <div className="mt-4">
                   <p className="uppercase text-xs opacity-50">Start Task</p>
@@ -108,7 +111,7 @@ export default function CampaignEnvironment() {
                 </div>
               </div>
 
-              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl py-3 mt-6">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl py-3 mt-4 md:mt-6">
                 Complete Tasks
               </Button>
             </div>

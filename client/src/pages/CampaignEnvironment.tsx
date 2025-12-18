@@ -43,23 +43,23 @@ export default function CampaignEnvironment() {
   const progressPercentage = Math.round((completedTasks / tasks.length) * 100);
 
   return (
-    <div className="min-h-screen bg-[#0a0615] text-white relative p-6">
+    <div className="min-h-screen bg-[#0a0615] text-white relative p-4 sm:p-6">
       <AnimatedBackground />
 
-      <div className="max-w-5xl mx-auto relative z-10 space-y-10">
+      <div className="max-w-4xl sm:max-w-5xl mx-auto relative z-10 space-y-8 sm:space-y-10">
 
         {/* Banner with Progress */}
-        <div className="w-full bg-gradient-to-r from-purple-700/40 to-purple-900/40 border border-white/10 rounded-2xl p-6 space-y-4">
-          <div className="flex justify-between items-center">
+        <div className="w-full bg-gradient-to-r from-purple-700/40 to-purple-900/40 border border-white/10 rounded-2xl p-4 sm:p-6 space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <p className="uppercase text-xs opacity-60">Get Started</p>
-              <p className="text-xl font-semibold">Join the Guild</p>
+              <p className="uppercase text-[0.6rem] sm:text-xs opacity-60">Get Started</p>
+              <p className="text-lg sm:text-xl font-semibold">Join the Guild</p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <p className="text-sm opacity-70 uppercase">Total XP</p>
-              <div className="bg-purple-600/30 border border-purple-500/40 px-4 py-2 rounded-full flex items-center gap-2">
-                <span className="font-bold">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <p className="text-[0.65rem] sm:text-sm opacity-70 uppercase">Total XP</p>
+              <div className="bg-purple-600/30 border border-purple-500/40 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-1 sm:gap-2">
+                <span className="font-bold text-xs sm:text-sm">
                   {tasks.reduce((a, t) => a + (t.status === "completed" ? t.reward : 0), 0)} XP
                 </span>
               </div>
@@ -67,35 +67,35 @@ export default function CampaignEnvironment() {
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden mt-3">
+          <div className="w-full bg-white/10 h-2 sm:h-3 rounded-full overflow-hidden mt-2 sm:mt-3">
             <div
-              className="h-3 bg-purple-600 transition-all duration-500"
+              className="h-2 sm:h-3 bg-purple-600 transition-all duration-500"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          <p className="text-sm opacity-60 mt-1">{progressPercentage}% completed</p>
+          <p className="text-[0.65rem] sm:text-sm opacity-60 mt-1">{progressPercentage}% completed</p>
         </div>
 
         {/* Main Quest Card */}
         <Card className="rounded-2xl bg-white/5 border-white/10 overflow-hidden shadow-xl">
-          <div className="grid grid-cols-2">
-            <div className="h-full">
+          <div className="flex flex-col sm:flex-row">
+            <div className="w-full sm:w-1/3 h-48 sm:h-auto">
               <img src="/campaign.png" alt="Quest" className="w-full h-full object-cover" />
             </div>
 
-            <div className="p-6 flex flex-col justify-between">
+            <div className="p-4 sm:p-6 flex flex-col justify-between w-full sm:w-2/3">
               <div>
-                <p className="text-xs opacity-50 uppercase mb-1">Nexura</p>
-                <p className="text-xl font-bold leading-tight">Quest 001:<br />Join the Guild</p>
-                <div className="mt-4">
-                  <p className="uppercase text-xs opacity-50">Start Task</p>
-                  <p className="text-sm opacity-80 leading-relaxed mt-1">
+                <p className="text-[0.65rem] sm:text-xs opacity-50 uppercase mb-1">Nexura</p>
+                <p className="text-lg sm:text-xl font-bold leading-tight">Quest 001:<br />Join the Guild</p>
+                <div className="mt-3 sm:mt-4">
+                  <p className="uppercase text-[0.6rem] sm:text-xs opacity-50">Start Task</p>
+                  <p className="text-sm sm:text-base opacity-80 leading-relaxed mt-1">
                     Complete simple tasks in the Nexura ecosystem and earn rewards.
                   </p>
                 </div>
-                <div className="mt-3 space-y-1">
-                  <p className="text-xs opacity-50 uppercase">Rewards</p>
-                  <p className="text-sm">500 XP</p>
+                <div className="mt-2 sm:mt-3 space-y-1">
+                  <p className="text-[0.6rem] sm:text-xs opacity-50 uppercase">Rewards</p>
+                  <p className="text-sm sm:text-base">500 XP</p>
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@ export default function CampaignEnvironment() {
         </Card>
 
         {/* Tasks List */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {tasks.map((task, index) => {
             let buttonText = "Start Task";
             if (task.status === "inProgress") buttonText = `Claim Reward: ${task.reward} XP`;
@@ -112,18 +112,18 @@ export default function CampaignEnvironment() {
             return (
               <div
                 key={index}
-                className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition"
+                className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white/5 border border-white/10 rounded-xl p-3 sm:p-4 hover:bg-white/10 transition gap-3 sm:gap-0"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10 text-white">
+                <div className="flex items-center gap-3 w-full sm:w-2/3">
+                  <div className="w-6 h-6 sm:w-6 sm:h-6 rounded-full flex items-center justify-center bg-white/10 text-white">
                     {task.status === "completed" ? <CheckCircle2 className="w-4 h-4 text-green-400" /> : <Play className="w-4 h-4" />}
                   </div>
-                  <span className="font-medium">{task.text}</span>
+                  <span className="text-sm sm:text-base font-medium">{task.text}</span>
                 </div>
 
                 <button
                   onClick={() => handleTaskClick(index)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold ${
+                  className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-semibold ${
                     task.status === "completed" ? "bg-gray-600 cursor-not-allowed" : "bg-purple-700 hover:bg-purple-800"
                   }`}
                 >
