@@ -118,7 +118,7 @@ export default function CampaignEnvironment() {
 
       setClaimedQuests([...claimedQuests, questId]);
 
-      if (claimedQuests.length === quests.length) { 
+      if (claimedQuests.length + 1 === quests.length) { 
         window.location.reload();
       }
 
@@ -209,7 +209,7 @@ export default function CampaignEnvironment() {
 
               <Button
                 onClick={() => claimCampaignReward()}
-                disabled={!completed?.questsCompleted || completed?.campaignCompleted || campaignCompleted || !(claimedQuests.length === quests.length)}
+                disabled={!completed?.questsCompleted || completed?.campaignCompleted || campaignCompleted || claimedQuests.length !== quests.length}
                 className={`w-full font-semibold rounded-xl py-3 mt-6 
                   ${completed?.questsCompleted || !completed?.campaignCompleted || !campaignCompleted || claimedQuests.length === quests.length
                     ? "bg-purple-600 hover:bg-purple-700 text-white"
