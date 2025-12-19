@@ -22,6 +22,12 @@ export const updateUsername = async (req: GlobalRequest, res: GlobalResponse) =>
     userToUpdate.username = username;
     await userToUpdate.save();
 
+    const userReferred = await referredUsers.findOne({ newUser: userToUpdate._id });
+    if (userReferred) {
+      userReferred.username = username;
+      await userReferred.save();
+    }
+
     res.status(OK).json({ message: "username updated!" });
   } catch (error) {
     logger.error(error);
