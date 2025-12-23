@@ -1,4 +1,4 @@
-// Leaderboard.tsx
+
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -431,6 +431,7 @@ if (isCurrentUser) {
       {entry.tasks_completed || 0} campaigns
     </span>
   </div>
+</div>
 </div>
 
                     </div>
