@@ -434,10 +434,8 @@ if (isCurrentUser) {
 </div>
 </div>
 
-                    </div>
-
-                    {/* XP */}
-                    <div className="flex items-center gap-1">
+{/* XP */}
+<div className="flex items-center gap-1">
                       <img src={xpIcon} alt="XP" className="w-5 h-5" />
                       <span className={text-xl font-bold ${isCurrentUser ? "text-[#f5c542]" : accent.text}}>
                         {entry.xp}
