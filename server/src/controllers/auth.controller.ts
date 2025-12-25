@@ -153,7 +153,7 @@ export const signIn = async (req: GlobalRequest, res: GlobalResponse) => {
 				code: referrerCode,
 			};
 
-			const userReferrer = await user.findOne({ "referrer.code": referrer });
+			const userReferrer = await user.findOne({ "referral.code": referrer });
 
 			const newUser = new user({ address, username: slicedAddress, referral, dateJoined });
 
