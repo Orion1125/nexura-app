@@ -7,134 +7,78 @@ import {
 	INTERNAL_SERVER_ERROR,
 	OK,
 } from "@/utils/status.utils";
+import { CLIENT_ID, REDIRECT_URI, CLIENT_REDIRECT_URI, DISCORD_CLIENT_SECRET } from "@/utils/env.utils";
 import { formatDate } from "date-fns";
 import { user } from "@/models/user.model";
 import { getRefreshToken, JWT, validateProjectData, validateUserSignUpData } from "@/utils/utils";
 import { project } from "@/models/project.model";
 import { uploadImg } from "@/utils/img.utils";
 import { referredUsers } from "@/models/referrer.model";
+import axios from "axios";
 
-interface SignUpParams {
-	email: string;
-	username: string;
-	password: string;
-	referrer?: string
-}
-
-const hashPassword = async (password: string) => {
-	const salt = bcrypt.genSaltSync(10);
-	const hashedPassword = await bcrypt.hash(password, salt);
-	return hashedPassword;
-}
-
-export const signUp = async (req: GlobalRequest, res: GlobalResponse) => {
+export const discordCallback = async (req: GlobalRequest, res: GlobalResponse) => {
 	try {
-		const { success } = validateUserSignUpData(req.body);
-		if (!success) {
-			res
-				.status(BAD_REQUEST)
-				.json({ error: "send the correct data required to create a user" });
+		const { code } = req.query as { code?: string };
+		const { id } = req;
+
+		if (!code) {
+			res.send("Please sign-in/connect discord again");
 			return;
 		}
 
-		const { username, password, email, referrer: referrerCode }: SignUpParams =
-			req.body;
-
-		if (username.length < 4) {
-			res
-				.status(BAD_REQUEST)
-				.json({ error: "username cannot be empty or less than 4 characters" });
+		const userToUpdate = await user.findById(id);
+		if (!userToUpdate) {
+			res.status(BAD_REQUEST).json({ error: "invalid user id" });
 			return;
 		}
 
-		const userReferrerCode = cryptoRandomString({
-			length: 8,
-			type: "alphanumeric",
+		const params = new URLSearchParams({
+			client_id: CLIENT_ID,
+			client_secret: DISCORD_CLIENT_SECRET,
+			redirect_uri: REDIRECT_URI,
+			code,
+			grant_type: "authorization_code",
 		});
 
-		const dateJoined = formatDate(new Date(), "MMM, y");
-
-		const referral = {
-			code: userReferrerCode,
+		const headers = {
+			"Content-Type": "application/x-www-form-urlencoded",
+			"Accept-encoding": "application/x-www-form-urlencoded",
 		};
 
-		const userReferrer = await user.findOne({ referral: { code: referrerCode } });
-		const hashedPassword = await hashPassword(password);
+		const { data: { access_token, refresh_token } } = await axios.post("https://discord.com/api/v10/oauth2/token", params, { headers });
 
-		const newUser = await user.create({ username, referral, dateJoined, password: hashedPassword, email });
-		const signedUp = formatDate(new Date(), "MMM dd, y");
-		if (userReferrer) {
-			await referredUsers.create({ user: userReferrer._id, signedUp, username: newUser.username });
-		}
-
-		const id = newUser._id;
-
-		const accessToken = JWT.sign({ id, status: "user" });
-		const refreshToken = getRefreshToken(id);
-
-		req.id = id as unknown as string;
-
-		res.cookie("refreshToken", refreshToken, {
-			httpOnly: true,
-			secure: true,
-			maxAge: 30 * 24 * 60 * 60,
+		const { data } = await axios.get("https://discord.com/api/v10/users/@me", {
+			headers: {
+				...headers,
+				Authorization: `Bearer ${access_token}`,
+			}
 		});
 
-		res.status(CREATED).json({ message: "user created!", accessToken });
+		userToUpdate.socialProfiles ??= {};
+
+		userToUpdate.socialProfiles.discord = { connected: true, id };
+
+		await userToUpdate.save();
+
+		res.status(OK).json({ messages: "connected!", user: userToUpdate });
 	} catch (error) {
 		logger.error(error);
-		res.status(INTERNAL_SERVER_ERROR).json({ error: "Error signing user up" });
+		res.status(INTERNAL_SERVER_ERROR).json({ error: "Error signing in with discord" });
 	}
 };
 
 export const signIn = async (req: GlobalRequest, res: GlobalResponse) => {
 	try {
-		// const { usernameOrEmail, password }: { usernameOrEmail: string; password: string } =
-		// 	req.body;
 
-		// if (!usernameOrEmail || usernameOrEmail.length < 4 || !password) {
-		// 	res
-		// 		.status(BAD_REQUEST)
-		// 		.json({ error: "usernameOrEmail or password cannot be empty or less than 4 characters" });
-		// 	return;
-		// }
-
-		// const existingUser = await user.findOne({ $or: [{ email: usernameOrEmail }, { username: usernameOrEmail }] });
-		// if (!existingUser) {
-		// 	res.status(BAD_REQUEST).json({ error: "invalid signin credentials" });
-		// 	return;
-		// }
-
-		// const comparePassword = await bcrypt.compare(password, existingUser.password);
-		// if (!comparePassword) {
-		// 	res.status(BAD_REQUEST).json({ error: "invalid signin credentials" });
-		// 	return;
-		// }
-
-		// const id = existingUser._id;
-
-		// const accessToken = JWT.sign({ id, status: "user" });
-		// const refreshToken = getRefreshToken(id);
-
-		// req.id = id as unknown as string;
-
-		// res.cookie("refreshToken", refreshToken, {
-		// 	httpOnly: true,
-		// 	secure: true,
-		// 	maxAge: 30 * 24 * 60 * 60,
-		// });
-
-		// res.status(OK).json({ message: "user signed in!", accessToken });
-
-		const { username, address, referrer }: { username?: string; address: string; referrer?: string } =
+		const { address, referrer }: { address: string; referrer?: string } =
 			req.body;
 
-		// if (!username || username.length < 4) {
-		// 	res
-		// 		.status(BAD_REQUEST)
-		// 		.json({ error: "username cannot be empty or less than 4 characters" });
-		// 	return;
-		// }
+		if (!address) {
+			res
+				.status(BAD_REQUEST)
+				.json({ error: "address cannot be empty" });
+			return;
+		}
 
 		const slicedAddress = address.slice(0, 4) + "..." + address.slice(-4);
 		console.log({ slicedAddress, referrer });
@@ -226,7 +170,7 @@ export const projectSignUp = async (
 		});
 
 		req.body.logo = projectLogoUrl;
-		req.body.password = await hashPassword(req.body.password);
+		// req.body.password = await hashPassword(req.body.password);
 
 		const projectUser = await project.create(req.body);
 
