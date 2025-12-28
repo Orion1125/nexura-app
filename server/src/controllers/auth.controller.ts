@@ -7,10 +7,18 @@ import {
 	INTERNAL_SERVER_ERROR,
 	OK,
 } from "@/utils/status.utils";
-import { CLIENT_ID, REDIRECT_URI, CLIENT_REDIRECT_URI, DISCORD_CLIENT_SECRET } from "@/utils/env.utils";
+import {
+	DISCORD_CLIENT_ID,
+	DISCORD_REDIRECT_URI,
+	DISCORD_CLIENT_SECRET, 
+	X_API_BEARER_TOKEN,
+	X_REDIRECT_URI, 
+	X_API_CLIENT_ID,
+	X_API_CLIENT_SECRET
+} from "@/utils/env.utils";
 import { formatDate } from "date-fns";
 import { user } from "@/models/user.model";
-import { getRefreshToken, JWT, validateProjectData, validateUserSignUpData } from "@/utils/utils";
+import { getRefreshToken, JWT, validateProjectData } from "@/utils/utils";
 import { project } from "@/models/project.model";
 import { uploadImg } from "@/utils/img.utils";
 import { referredUsers } from "@/models/referrer.model";
@@ -18,24 +26,23 @@ import axios from "axios";
 
 export const discordCallback = async (req: GlobalRequest, res: GlobalResponse) => {
 	try {
-		const { code } = req.query as { code?: string };
-		const { id } = req;
+		const { code } = req.query as { code: string };
 
 		if (!code) {
 			res.send("Please sign-in/connect discord again");
 			return;
 		}
 
-		const userToUpdate = await user.findById(id);
+		const userToUpdate = await user.findById(req.id);
 		if (!userToUpdate) {
 			res.status(BAD_REQUEST).json({ error: "invalid user id" });
 			return;
 		}
 
 		const params = new URLSearchParams({
-			client_id: CLIENT_ID,
+			client_id: DISCORD_CLIENT_ID,
 			client_secret: DISCORD_CLIENT_SECRET,
-			redirect_uri: REDIRECT_URI,
+			redirect_uri: DISCORD_REDIRECT_URI,
 			code,
 			grant_type: "authorization_code",
 		});
@@ -47,7 +54,7 @@ export const discordCallback = async (req: GlobalRequest, res: GlobalResponse) =
 
 		const { data: { access_token, refresh_token } } = await axios.post("https://discord.com/api/v10/oauth2/token", params, { headers });
 
-		const { data } = await axios.get("https://discord.com/api/v10/users/@me", {
+		const { data: { id, username } } = await axios.get("https://discord.com/api/v10/users/@me", {
 			headers: {
 				...headers,
 				Authorization: `Bearer ${access_token}`,
@@ -56,7 +63,7 @@ export const discordCallback = async (req: GlobalRequest, res: GlobalResponse) =
 
 		userToUpdate.socialProfiles ??= {};
 
-		userToUpdate.socialProfiles.discord = { connected: true, id };
+		userToUpdate.socialProfiles.discord = { connected: true, id, username };
 
 		await userToUpdate.save();
 
@@ -66,6 +73,47 @@ export const discordCallback = async (req: GlobalRequest, res: GlobalResponse) =
 		res.status(INTERNAL_SERVER_ERROR).json({ error: "Error signing in with discord" });
 	}
 };
+
+export const xCallback = async (req: GlobalRequest, res: GlobalResponse) => {
+	try {
+		const { code, codeVerifier } = req.query as { code: string; codeVerifier: string };
+
+		if (!code || !codeVerifier) {
+			res.status(BAD_REQUEST).json({ error: "auth code from x or codeVerifier is required" });
+			return;
+		}
+
+		const userToUpdate = await user.findById(req.id);
+		if (!userToUpdate) {
+			res.status(BAD_REQUEST).json({ error: "invalid user id" });
+			return;
+		}
+
+		const { data: { access_token } } = await axios.post(
+			`https://api.twitter.com/2/oauth2/token?grant_type=authorization_code&client_id=${X_API_CLIENT_ID}&redirect_uri=${X_REDIRECT_URI}&code=${code}&code_verifier=${codeVerifier}`, 
+			{ headers: 
+				{ "Content-Type": "application/x-www-form-urlencoded" }
+			}
+		);
+
+		const { data: { id, username } } = await axios.get("https://api.twitter.com/2/users/me",
+			{ headers: 
+				{ "Authorization": `Bearer ${access_token}` }
+			}
+		);
+
+		userToUpdate.socialProfiles ??= {};
+
+		userToUpdate.socialProfiles.x = { connected: true, id, username };
+
+		await userToUpdate.save();
+
+		res.status(OK).json({ messages: "connected!", user: userToUpdate });
+	} catch (error) {
+		logger.error(error);
+		res.status(INTERNAL_SERVER_ERROR).json({ error: "Error signing in with x" });
+	}
+}
 
 export const signIn = async (req: GlobalRequest, res: GlobalResponse) => {
 	try {
