@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { uploadFile } from "@/lib/upload";
-import { getSessionToken } from "@/lib/session";
+import { getSessionToken, emitSessionChange } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,11 @@ import { ArrowLeft, Save, Upload, X, Camera } from "lucide-react";
 import { FaDiscord, FaTwitter } from "react-icons/fa";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { emitSessionChange } from "@/lib/session";
 import { apiRequestV2 } from "@/lib/queryClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import { discordAuthUrl } from "@/lib/constants";
+import { xAuthUrl } from "@/lib/generateXAuthUrl";
 
 export default function EditProfile() {
   const [, setLocation] = useLocation();
@@ -27,7 +28,7 @@ export default function EditProfile() {
   const [profileData, setProfileData] = useState({
     displayName: user?.displayName || user?.username || "User",
     socialProfiles: {
-      twitter: { connected: false, username: "" },
+      x: { connected: false, username: "" },
       discord: { connected: false, username: "" }
     }
   });
@@ -37,8 +38,8 @@ export default function EditProfile() {
     if (user) {
       setProfileData({
         displayName: user.displayName || user.username || "User",
-        socialProfiles: {
-          twitter: { connected: false, username: "" },
+        socialProfiles: user.socialProfiles ?? {
+          x: { connected: false, username: "" },
           discord: { connected: false, username: "" }
         }
       });
@@ -142,23 +143,23 @@ export default function EditProfile() {
     }
   };
 
-  const handleConnect = (service: "twitter" | "discord") => {
+  const handleConnect = (service: "x" | "discord") => {
     // Redirect to actual social media connection sites
     const urls = {
-      twitter: "https://twitter.com/i/oauth/authorize", // This would be configured with proper OAuth params
-      discord: "https://discord.com/api/oauth2/authorize" // This would be configured with proper OAuth params
+      x: xAuthUrl,
+      discord: discordAuthUrl
     };
-    
+
     toast({
       title: `Connecting to ${service}`,
       description: `Opening ${service} authentication...`,
     });
-    
+
     // Open in new tab for OAuth flow
-    window.open(urls[service], '_blank', 'noopener,noreferrer');
+    window.open(urls[service]);
   };
 
-  const handleDisconnect = (service: "twitter" | "discord") => {
+  const handleDisconnect = (service: "x" | "discord") => {
     setProfileData(prev => ({
       ...prev,
       socialProfiles: {
@@ -285,30 +286,30 @@ export default function EditProfile() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Twitter/X */}
-            <div className="flex items-center justify-between" data-testid="twitter-connection">
+            <div className="flex items-center justify-between" data-testid="x-connection">
               <div className="flex items-center space-x-3">
                 <FaTwitter className="w-6 h-6 text-[#1DA1F2]" />
                 <div>
                   <p className="font-medium">X (Formerly Twitter)</p>
-                  {profileData.socialProfiles.twitter.connected ? (
-                    <p className="text-sm text-muted-foreground">@{profileData.socialProfiles.twitter.username}</p>
+                  {profileData.socialProfiles.x.connected ? (
+                    <p className="text-sm text-muted-foreground">@{profileData.socialProfiles.x.username}</p>
                   ) : (
                     <p className="text-sm text-muted-foreground">Not connected</p>
                   )}
                 </div>
               </div>
-              {profileData.socialProfiles.twitter.connected ? (
+              {profileData.socialProfiles.x.connected ? (
                 <Button 
                   variant="outline" 
-                  onClick={() => handleDisconnect("twitter")}
-                  data-testid="button-disconnect-twitter"
+                  onClick={() => handleDisconnect("x")}
+                  data-testid="button-disconnect-x"
                 >
                   Disconnect
                 </Button>
               ) : (
                 <Button 
-                  onClick={() => handleConnect("twitter")}
-                  data-testid="button-connect-twitter"
+                  onClick={() => handleConnect("x")}
+                  data-testid="button-connect-x"
                 >
                   Connect
                 </Button>
