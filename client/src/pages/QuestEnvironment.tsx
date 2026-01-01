@@ -48,7 +48,8 @@ export default function QuestEnvironment() {
     try { return Boolean(JSON.parse(localStorage.getItem('nexura:quest:completed') || "")[userId]); } catch (error) { return false }
   });
 
-  const { questId } = useParams();
+  const params = useParams();
+  const questId = (params as any).questId;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -97,14 +98,14 @@ export default function QuestEnvironment() {
       setQuestCompleted(true);
     } catch (error: any) {
       console.error(error);
-      toast.error({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   }
 
   const claimReward = async (miniQuestId: string) => {
     try {
       if (!getStoredAccessToken()) {
-        toast.error({ title: "Error", description: "You must be logged in to claim rewards.", variant: "destructive" });
+        toast({ title: "Error", description: "You must be logged in to claim rewards.", variant: "destructive" });
         return;
       }
 
@@ -119,7 +120,7 @@ export default function QuestEnvironment() {
       if (!res.ok) return;
     } catch (error: any) {
       console.error(error);
-      toast.error({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
