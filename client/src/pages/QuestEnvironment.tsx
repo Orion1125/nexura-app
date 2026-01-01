@@ -186,7 +186,6 @@ export default function QuestEnvironment() {
       <AnimatedBackground />
 
       <div className="max-w-4xl mx-auto relative z-10 space-y-10">
-        {/* Banner */}
         <div className="w-full bg-gradient-to-r from-purple-700/40 to-purple-900/40 border border-white/10 rounded-2xl p-5 md:p-6 flex flex-col md:flex-row gap-4 md:gap-0 md:justify-between md:items-center">
           <div>
             <p className="uppercase text-xs opacity-60">{title}</p>
@@ -201,13 +200,12 @@ export default function QuestEnvironment() {
           </div>
         </div>
 
-        {/* Main Quest Card */}
         <Card className="rounded-2xl bg-white/5 border-white/10 overflow-hidden shadow-xl">
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="h-48 md:h-full">
               <img
                 src="/campaign.png"
-                alt="Quest"
+                alt="Campaign"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -220,9 +218,10 @@ export default function QuestEnvironment() {
                 <div className="mt-4">
                   <p className="uppercase text-xs opacity-50">Start Quest</p>
                   <p className="text-sm opacity-80 leading-relaxed mt-1">
-                    Complete simple quests in the Nexura ecosystem and earn rewards.
+                    Complete the tasks below to earn rewards and unlock achievements.
                   </p>
                 </div>
+
                 <div className="mt-3 space-y-1">
                   <p className="text-xs opacity-50 uppercase">Rewards</p>
                   <p className="text-sm">{totalXP} XP</p>
